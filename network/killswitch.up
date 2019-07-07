@@ -1,0 +1,49 @@
+#!/bin/bash
+
+export INTERFACE=$1
+export GATEWAY=$5
+export VPNUSER="[USER]"
+export LANIP="[SUBNET]"
+export NETIF="br0"
+
+iptables -F -t nat
+iptables -F -t mangle
+iptables -F -t filter
+
+# mark packets from $VPNUSER
+iptables -t mangle -A OUTPUT ! --dest $LANIP -m owner --uid-owner $VPNUSER -j MARK --set-mark 0x3
+iptables -t mangle -A OUTPUT --dest $LANIP -p udp --dport 53 -m owner --uid-owner $VPNUSER -j MARK --set-mark 0x3
+iptables -t mangle -A OUTPUT --dest $LANIP -p tcp --dport 53 -m owner --uid-owner $VPNUSER -j MARK --set-mark 0x3
+iptables -t mangle -A OUTPUT ! --src $LANIP -j MARK --set-mark 0x3
+
+# allow responses
+iptables -A INPUT -i $INTERFACE -m conntrack --ctstate ESTABLISHED -j ACCEPT
+
+# allow torrent
+iptables -A INPUT -i $INTERFACE -p tcp --dport 59560 -j ACCEPT
+iptables -A INPUT -i $INTERFACE -p tcp --dport 6443 -j ACCEPT
+iptables -A INPUT -i $INTERFACE -p udp --dport 8881 -j ACCEPT
+iptables -A INPUT -i $INTERFACE -p udp --dport 7881 -j ACCEPT
+
+# block everything else incoming on $INTERFACE
+iptables -A INPUT -i $INTERFACE -j REJECT
+
+# send DNS to google for $VPNUSER
+iptables -t nat -A OUTPUT --dest $LANIP -p udp --dport 53  -m owner --uid-owner $VPNUSER  -j DNAT --to-destination 8.8.4.4
+iptables -t nat -A OUTPUT --dest $LANIP -p tcp --dport 53  -m owner --uid-owner $VPNUSER  -j DNAT --to-destination 8.8.8.8
+
+# let $VPNUSER access lo and $INTERFACE
+iptables -A OUTPUT -o lo -m owner --uid-owner $VPNUSER -j ACCEPT
+iptables -A OUTPUT -o $INTERFACE -m owner --uid-owner $VPNUSER -j ACCEPT
+
+# all packets on $INTERFACE needs to be masqueraded
+iptables -t nat -A POSTROUTING -o $INTERFACE -j MASQUERADE
+
+
+
+# add routes
+ip rule add from all fwmark 0x3 lookup 200
+ip route replace default via $GATEWAY table 200
+ip route append default via 127.0.0.1 dev lo table 200
+ip route add default via $GATEWAY dev $INTERFACE table 200 
+ip route flush cache
