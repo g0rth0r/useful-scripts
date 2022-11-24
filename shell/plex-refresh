@@ -1,0 +1,12 @@
+#! /bin/bash
+
+#TOKEN="XXXXXXXXXXXXXXXXXXXXXX"
+# Token retracted. Env must be exported
+
+echo "$(date) - Refreshing Movies..."
+curl -Is http://127.0.0.1:32400/library/sections/1/refresh?X-Plex-Token=$PLEX_TOKEN | grep HTTP/1.1
+
+echo ""$(date) - Refreshing TV Shows...""
+curl -Is http://127.0.0.1:32400/library/sections/2/refresh?X-Plex-Token=$PLEX_TOKEN | grep HTTP/1.1
+
+
