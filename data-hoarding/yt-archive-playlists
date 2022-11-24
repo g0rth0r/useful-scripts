@@ -1,0 +1,8 @@
+#!/bin/bash
+WORK_DIR='/mnt/beta/root/videos/youtube'
+
+# Sync the download archive file from Alpha. TODO make another sync scrtipt for logs
+## TODO
+
+# Download playlists from file. 
+/usr/local/bin/yt-dlp --playlist-reverse --download-archive $WORK_DIR/archive.log  -i --sleep-interval 5 --max-sleep-interval 30 -o "$WORK_DIR/%(channel)s/%(playlist_title)s/%(playlist_index)s - %(title)s [%(id)s]/%(playlist_index)s - %(title)s [%(id)s].%(ext)s" -f bestvideo[ext=mp4]+bestaudio[ext=m4a] --merge-output-format mp4 --add-metadata --write-description --write-info-json --write-annotations --write-thumbnail --batch-file /home/vpn/scrub-lists/youtube-playlists.txt
