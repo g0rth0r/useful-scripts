@@ -21,5 +21,5 @@
 # For more information see the manual pages of crontab(5) and cron(8)
 # 
 # m h  dom mon dow   command
-*/15 * * * * /home/pi/scripts/gym_scrap.sh >>/home/vpn/gym.log
-0 3 * * 2 /usr/local/bin/yt-archive-playlists
+*/15 * * * * /home/arbiter/bin/gym_scrap.sh >>/home/vpn/gym.log
+0 3 * * 2 /home/arbiter/bin/yt-archive-playlists
