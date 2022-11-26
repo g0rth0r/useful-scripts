@@ -9,4 +9,4 @@ cp ./shell/* ~/bin
 cat ./os-files/.bash_aliases >>~/.bash_aliases
 
 export PATH=$PATH:~/bin
-
+echo "export PATH=$PATH:~/bin" >>~/.bashrc
